@@ -202,17 +202,17 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Setting, Grid, DataBoard } from '@element-plus/icons-vue'
 import { use } from 'echarts/core'
-import { PieChart } from 'echarts/charts'
+import { PieChart, ScatterChart, LineChart, BarChart } from 'echarts/charts'
 import { 
   TitleComponent, TooltipComponent, LegendComponent,
-  GraphicComponent
+  GraphicComponent, PolarComponent
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
 
 use([
-  PieChart, TitleComponent, TooltipComponent, 
-  LegendComponent, GraphicComponent, CanvasRenderer
+  PieChart, ScatterChart, LineChart, BarChart, TitleComponent, TooltipComponent, 
+  LegendComponent, GraphicComponent, PolarComponent, CanvasRenderer
 ])
 
 const router = useRouter()
@@ -330,16 +330,8 @@ const stageData = ref([
   }
 ])
 
-// 图表配置
+// 图表配置 - 扇形雷达图
 const wheatChartOption = computed(() => {
-  const data = stageData.value.map(item => ({
-    name: item.code,
-    value: item.wheat,
-    itemStyle: {
-      color: getStageColor(item.wheat)
-    }
-  }))
-
   return {
     title: {
       text: '小麦氮素利用率',
@@ -353,41 +345,76 @@ const wheatChartOption = computed(() => {
     tooltip: {
       trigger: 'item',
       formatter: function(params) {
-        const stageInfo = stageData.value.find(s => s.code === params.name)
+        const stageInfo = stageData.value[params.dataIndex]
         return `
           <strong>${stageInfo?.stage || params.name}</strong><br/>
-          代码: ${params.name}<br/>
-          利用率: ${params.value}%<br/>
+          代码: ${stageInfo?.code}<br/>
+          利用率: ${stageInfo?.wheat}%<br/>
           描述: ${stageInfo?.description || ''}
         `
       }
     },
-    legend: {
-      show: false
+    polar: {
+      radius: [20, '80%']
+    },
+    radiusAxis: {
+      type: 'category',
+      data: stageData.value.map(item => item.code),
+      z: 10,
+      axisLabel: {
+        show: showLabels.value,
+        fontSize: 10,
+        margin: 8
+      },
+      axisLine: {
+        show: false
+      },
+      axisTick: {
+        show: false
+      }
+    },
+    angleAxis: {
+      type: 'value',
+      min: 0,
+      max: 100,
+      axisLabel: {
+        show: false
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: '#e0e0e0',
+          type: 'dashed'
+        }
+      },
+      axisLine: {
+        show: false
+      }
     },
     series: [
       {
-        type: 'pie',
-        radius: chartType.value === 'pie-radar' ? ['30%', `${chartSize.value}%`] : [`${chartSize.value - 20}%`, `${chartSize.value}%`],
-        center: ['50%', '55%'],
-        data: data,
+        type: 'bar',
+        coordinateSystem: 'polar',
+        data: stageData.value.map(item => item.wheat),
+        itemStyle: {
+          color: function(params) {
+            return getStageColor(params.value)
+          },
+          borderColor: '#fff',
+          borderWidth: 1
+        },
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
+            shadowColor: 'rgba(0, 0, 0, 0.3)'
           }
         },
         label: {
           show: showLabels.value,
-          position: 'outside',
-          formatter: '{b}',
-          fontSize: 10
-        },
-        labelLine: {
-          show: showLabels.value,
-          length: 15,
-          length2: 10
+          position: 'middle',
+          formatter: '{c}%',
+          fontSize: 10,
+          color: '#333'
         }
       }
     ]
@@ -395,14 +422,6 @@ const wheatChartOption = computed(() => {
 })
 
 const peaChartOption = computed(() => {
-  const data = stageData.value.map(item => ({
-    name: item.code,
-    value: item.pea,
-    itemStyle: {
-      color: getStageColor(item.pea)
-    }
-  }))
-
   return {
     title: {
       text: '豌豆氮素利用率',
@@ -416,41 +435,76 @@ const peaChartOption = computed(() => {
     tooltip: {
       trigger: 'item',
       formatter: function(params) {
-        const stageInfo = stageData.value.find(s => s.code === params.name)
+        const stageInfo = stageData.value[params.dataIndex]
         return `
           <strong>${stageInfo?.stage || params.name}</strong><br/>
-          代码: ${params.name}<br/>
-          利用率: ${params.value}%<br/>
+          代码: ${stageInfo?.code}<br/>
+          利用率: ${stageInfo?.pea}%<br/>
           描述: ${stageInfo?.description || ''}
         `
       }
     },
-    legend: {
-      show: false
+    polar: {
+      radius: [20, '80%']
+    },
+    radiusAxis: {
+      type: 'category',
+      data: stageData.value.map(item => item.code),
+      z: 10,
+      axisLabel: {
+        show: showLabels.value,
+        fontSize: 10,
+        margin: 8
+      },
+      axisLine: {
+        show: false
+      },
+      axisTick: {
+        show: false
+      }
+    },
+    angleAxis: {
+      type: 'value',
+      min: 0,
+      max: 100,
+      axisLabel: {
+        show: false
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: '#e0e0e0',
+          type: 'dashed'
+        }
+      },
+      axisLine: {
+        show: false
+      }
     },
     series: [
       {
-        type: 'pie',
-        radius: chartType.value === 'pie-radar' ? ['30%', `${chartSize.value}%`] : [`${chartSize.value - 20}%`, `${chartSize.value}%`],
-        center: ['50%', '55%'],
-        data: data,
+        type: 'bar',
+        coordinateSystem: 'polar',
+        data: stageData.value.map(item => item.pea),
+        itemStyle: {
+          color: function(params) {
+            return getStageColor(params.value)
+          },
+          borderColor: '#fff',
+          borderWidth: 1
+        },
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
+            shadowColor: 'rgba(0, 0, 0, 0.3)'
           }
         },
         label: {
           show: showLabels.value,
-          position: 'outside',
-          formatter: '{b}',
-          fontSize: 10
-        },
-        labelLine: {
-          show: showLabels.value,
-          length: 15,
-          length2: 10
+          position: 'middle',
+          formatter: '{c}%',
+          fontSize: 10,
+          color: '#333'
         }
       }
     ]

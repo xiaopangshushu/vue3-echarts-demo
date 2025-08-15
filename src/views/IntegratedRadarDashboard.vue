@@ -669,15 +669,31 @@ const mainChartOption = computed(() => {
       value: currentData[cropName],
       name: cropName,
       areaStyle: {
-        color: cropColors.value[cropName]?.area || 'rgba(0, 123, 255, 0.4)'
+        color: show3D.value ? 
+          `linear-gradient(45deg, ${cropColors.value[cropName]?.area || 'rgba(0, 123, 255, 0.6)'}, ${cropColors.value[cropName]?.line || '#007bff'}40)` :
+          cropColors.value[cropName]?.area || 'rgba(0, 123, 255, 0.4)',
+        shadowBlur: show3D.value ? 20 : 0,
+        shadowColor: show3D.value ? 'rgba(0, 0, 0, 0.3)' : 'transparent',
+        shadowOffsetX: show3D.value ? 5 : 0,
+        shadowOffsetY: show3D.value ? 5 : 0
       },
       lineStyle: {
-        color: cropColors.value[cropName]?.line || '#007bff',
-        width: show3D.value ? 4 : 3
+        color: show3D.value ? 
+          `linear-gradient(45deg, ${cropColors.value[cropName]?.line || '#007bff'}, ${cropColors.value[cropName]?.line || '#007bff'}80)` :
+          cropColors.value[cropName]?.line || '#007bff',
+        width: show3D.value ? 5 : 3,
+        shadowBlur: show3D.value ? 15 : 0,
+        shadowColor: show3D.value ? 'rgba(0, 0, 0, 0.4)' : 'transparent'
       },
       itemStyle: {
-        color: cropColors.value[cropName]?.line || '#007bff',
-        borderWidth: 2
+        color: show3D.value ? 
+          `radial-gradient(circle, ${cropColors.value[cropName]?.line || '#007bff'}, ${cropColors.value[cropName]?.line || '#007bff'}60)` :
+          cropColors.value[cropName]?.line || '#007bff',
+        borderWidth: show3D.value ? 3 : 2,
+        shadowBlur: show3D.value ? 10 : 0,
+        shadowColor: show3D.value ? 'rgba(0, 0, 0, 0.5)' : 'transparent',
+        shadowOffsetX: show3D.value ? 3 : 0,
+        shadowOffsetY: show3D.value ? 3 : 0
       }
     }))
 
