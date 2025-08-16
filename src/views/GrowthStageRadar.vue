@@ -74,6 +74,41 @@
           <v-chart ref="peaChart" :option="peaChartOption" autoresize class="pie-chart" />
         </el-card>
       </div>
+
+      <!-- 新增：径向柱状图（更接近图片效果） -->
+      <div class="chart-section">
+        <el-card class="chart-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <span>径向生长阶段图 - 小麦</span>
+              <div class="legend-indicators">
+                <span class="legend-item yellow">早期</span>
+                <span class="legend-item green">中期</span>
+                <span class="legend-item blue">后期</span>
+              </div>
+            </div>
+          </template>
+          
+          <v-chart ref="radialWheatChart" :option="radialWheatChartOption" autoresize class="pie-chart" />
+        </el-card>
+      </div>
+
+      <div class="chart-section">
+        <el-card class="chart-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <span>径向生长阶段图 - 豌豆</span>
+              <div class="legend-indicators">
+                <span class="legend-item yellow">早期</span>
+                <span class="legend-item green">中期</span>
+                <span class="legend-item blue">后期</span>
+              </div>
+            </div>
+          </template>
+          
+          <v-chart ref="radialPeaChart" :option="radialPeaChartOption" autoresize class="pie-chart" />
+        </el-card>
+      </div>
     </div>
 
     <!-- 数据表格 -->
@@ -330,11 +365,316 @@ const stageData = ref([
   }
 ])
 
-// 图表配置 - 扇形雷达图
+// 图表配置 - 支持多种类型切换
 const wheatChartOption = computed(() => {
+  if (chartType.value === 'circular') {
+    // 环形图配置
+    const data = stageData.value.map(item => ({
+      name: item.code,
+      value: item.wheat,
+      itemStyle: {
+        color: getStageColor(item.wheat)
+      }
+    }))
+
+    return {
+      title: {
+        text: '小麦氮素利用率',
+        left: 'center',
+        top: 20,
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold'
+        }
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: function(params) {
+          const stageInfo = stageData.value.find(s => s.code === params.name)
+          return `
+            <strong>${stageInfo?.stage || params.name}</strong><br/>
+            代码: ${params.name}<br/>
+            利用率: ${params.value}%<br/>
+            描述: ${stageInfo?.description || ''}
+          `
+        }
+      },
+      series: [
+        {
+          type: 'pie',
+          radius: [`${chartSize.value - 30}%`, `${chartSize.value}%`],
+          center: ['50%', '55%'],
+          data: data,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          },
+          label: {
+            show: showLabels.value,
+            position: 'outside',
+            formatter: '{b}\n{c}%',
+            fontSize: 10
+          },
+          labelLine: {
+            show: showLabels.value,
+            length: 15,
+            length2: 10
+          }
+        }
+      ]
+    }
+  } else {
+    // 极坐标柱状图配置
+    return {
+      title: {
+        text: '小麦氮素利用率',
+        left: 'center',
+        top: 20,
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold'
+        }
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: function(params) {
+          const stageInfo = stageData.value[params.dataIndex]
+          return `
+            <strong>${stageInfo?.stage || params.name}</strong><br/>
+            代码: ${stageInfo?.code}<br/>
+            利用率: ${stageInfo?.wheat}%<br/>
+            描述: ${stageInfo?.description || ''}
+          `
+        }
+      },
+      polar: {
+        radius: [20, `${chartSize.value}%`]
+      },
+      radiusAxis: {
+        type: 'category',
+        data: stageData.value.map(item => item.code),
+        z: 10,
+        axisLabel: {
+          show: showLabels.value,
+          fontSize: 10,
+          margin: 8
+        },
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        }
+      },
+      angleAxis: {
+        type: 'value',
+        min: 0,
+        max: 100,
+        axisLabel: {
+          show: false
+        },
+        splitLine: {
+          show: true,
+          lineStyle: {
+            color: '#e0e0e0',
+            type: 'dashed'
+          }
+        },
+        axisLine: {
+          show: false
+        }
+      },
+      series: [
+        {
+          type: 'bar',
+          coordinateSystem: 'polar',
+          data: stageData.value.map(item => item.wheat),
+          itemStyle: {
+            color: function(params) {
+              return getStageColor(params.value)
+            },
+            borderColor: '#fff',
+            borderWidth: 1
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.3)'
+            }
+          },
+          label: {
+            show: showLabels.value,
+            position: 'middle',
+            formatter: '{c}%',
+            fontSize: 10,
+            color: '#333'
+          }
+        }
+      ]
+    }
+  }
+})
+
+const peaChartOption = computed(() => {
+  if (chartType.value === 'circular') {
+    // 环形图配置
+    const data = stageData.value.map(item => ({
+      name: item.code,
+      value: item.pea,
+      itemStyle: {
+        color: getStageColor(item.pea)
+      }
+    }))
+
+    return {
+      title: {
+        text: '豌豆氮素利用率',
+        left: 'center',
+        top: 20,
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold'
+        }
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: function(params) {
+          const stageInfo = stageData.value.find(s => s.code === params.name)
+          return `
+            <strong>${stageInfo?.stage || params.name}</strong><br/>
+            代码: ${params.name}<br/>
+            利用率: ${params.value}%<br/>
+            描述: ${stageInfo?.description || ''}
+          `
+        }
+      },
+      series: [
+        {
+          type: 'pie',
+          radius: [`${chartSize.value - 30}%`, `${chartSize.value}%`],
+          center: ['50%', '55%'],
+          data: data,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          },
+          label: {
+            show: showLabels.value,
+            position: 'outside',
+            formatter: '{b}\n{c}%',
+            fontSize: 10
+          },
+          labelLine: {
+            show: showLabels.value,
+            length: 15,
+            length2: 10
+          }
+        }
+      ]
+    }
+  } else {
+    // 极坐标柱状图配置
+    return {
+      title: {
+        text: '豌豆氮素利用率',
+        left: 'center',
+        top: 20,
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold'
+        }
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: function(params) {
+          const stageInfo = stageData.value[params.dataIndex]
+          return `
+            <strong>${stageInfo?.stage || params.name}</strong><br/>
+            代码: ${stageInfo?.code}<br/>
+            利用率: ${stageInfo?.pea}%<br/>
+            描述: ${stageInfo?.description || ''}
+          `
+        }
+      },
+      polar: {
+        radius: [20, `${chartSize.value}%`]
+      },
+      radiusAxis: {
+        type: 'category',
+        data: stageData.value.map(item => item.code),
+        z: 10,
+        axisLabel: {
+          show: showLabels.value,
+          fontSize: 10,
+          margin: 8
+        },
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        }
+      },
+      angleAxis: {
+        type: 'value',
+        min: 0,
+        max: 100,
+        axisLabel: {
+          show: false
+        },
+        splitLine: {
+          show: true,
+          lineStyle: {
+            color: '#e0e0e0',
+            type: 'dashed'
+          }
+        },
+        axisLine: {
+          show: false
+        }
+      },
+      series: [
+        {
+          type: 'bar',
+          coordinateSystem: 'polar',
+          data: stageData.value.map(item => item.pea),
+          itemStyle: {
+            color: function(params) {
+              return getStageColor(params.value)
+            },
+            borderColor: '#fff',
+            borderWidth: 1
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.3)'
+            }
+          },
+          label: {
+            show: showLabels.value,
+            position: 'middle',
+            formatter: '{c}%',
+            fontSize: 10,
+            color: '#333'
+          }
+        }
+      ]
+    }
+  }
+})
+
+// 新增：径向柱状图配置 - 更接近图片效果
+const radialWheatChartOption = computed(() => {
   return {
     title: {
-      text: '小麦氮素利用率',
+      text: '小麦生长阶段径向图',
       left: 'center',
       top: 20,
       textStyle: {
@@ -347,44 +687,53 @@ const wheatChartOption = computed(() => {
       formatter: function(params) {
         const stageInfo = stageData.value[params.dataIndex]
         return `
-          <strong>${stageInfo?.stage || params.name}</strong><br/>
+          <strong>${stageInfo?.stage}</strong><br/>
           代码: ${stageInfo?.code}<br/>
           利用率: ${stageInfo?.wheat}%<br/>
-          描述: ${stageInfo?.description || ''}
+          描述: ${stageInfo?.description}
         `
       }
     },
     polar: {
-      radius: [20, '80%']
+      radius: [30, '85%']
     },
     radiusAxis: {
-      type: 'category',
-      data: stageData.value.map(item => item.code),
-      z: 10,
-      axisLabel: {
-        show: showLabels.value,
-        fontSize: 10,
-        margin: 8
-      },
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      }
-    },
-    angleAxis: {
       type: 'value',
       min: 0,
       max: 100,
       axisLabel: {
-        show: false
+        show: true,
+        fontSize: 10,
+        color: '#666'
       },
       splitLine: {
         show: true,
         lineStyle: {
           color: '#e0e0e0',
-          type: 'dashed'
+          type: 'dashed',
+          width: 1
+        }
+      },
+      axisLine: {
+        show: false
+      }
+    },
+    angleAxis: {
+      type: 'category',
+      data: stageData.value.map(item => item.code),
+      boundaryGap: false,
+      axisLabel: {
+        show: showLabels.value,
+        fontSize: 10,
+        color: '#333',
+        margin: 15
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: '#e0e0e0',
+          type: 'solid',
+          width: 1
         }
       },
       axisLine: {
@@ -395,36 +744,41 @@ const wheatChartOption = computed(() => {
       {
         type: 'bar',
         coordinateSystem: 'polar',
-        data: stageData.value.map(item => item.wheat),
-        itemStyle: {
-          color: function(params) {
-            return getStageColor(params.value)
-          },
-          borderColor: '#fff',
-          borderWidth: 1
-        },
+        data: stageData.value.map((item, index) => ({
+          value: item.wheat,
+          itemStyle: {
+            color: getStageColor(item.wheat),
+            borderColor: '#fff',
+            borderWidth: 2,
+            shadowBlur: 5,
+            shadowColor: 'rgba(0, 0, 0, 0.2)',
+            shadowOffsetY: 2
+          }
+        })),
+        barWidth: '60%',
         emphasis: {
           itemStyle: {
-            shadowBlur: 10,
-            shadowColor: 'rgba(0, 0, 0, 0.3)'
+            shadowBlur: 15,
+            shadowColor: 'rgba(0, 0, 0, 0.4)'
           }
         },
         label: {
           show: showLabels.value,
-          position: 'middle',
+          position: 'outside',
           formatter: '{c}%',
           fontSize: 10,
-          color: '#333'
+          color: '#333',
+          fontWeight: 'bold'
         }
       }
     ]
   }
 })
 
-const peaChartOption = computed(() => {
+const radialPeaChartOption = computed(() => {
   return {
     title: {
-      text: '豌豆氮素利用率',
+      text: '豌豆生长阶段径向图',
       left: 'center',
       top: 20,
       textStyle: {
@@ -437,44 +791,53 @@ const peaChartOption = computed(() => {
       formatter: function(params) {
         const stageInfo = stageData.value[params.dataIndex]
         return `
-          <strong>${stageInfo?.stage || params.name}</strong><br/>
+          <strong>${stageInfo?.stage}</strong><br/>
           代码: ${stageInfo?.code}<br/>
           利用率: ${stageInfo?.pea}%<br/>
-          描述: ${stageInfo?.description || ''}
+          描述: ${stageInfo?.description}
         `
       }
     },
     polar: {
-      radius: [20, '80%']
+      radius: [30, '85%']
     },
     radiusAxis: {
-      type: 'category',
-      data: stageData.value.map(item => item.code),
-      z: 10,
-      axisLabel: {
-        show: showLabels.value,
-        fontSize: 10,
-        margin: 8
-      },
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      }
-    },
-    angleAxis: {
       type: 'value',
       min: 0,
       max: 100,
       axisLabel: {
-        show: false
+        show: true,
+        fontSize: 10,
+        color: '#666'
       },
       splitLine: {
         show: true,
         lineStyle: {
           color: '#e0e0e0',
-          type: 'dashed'
+          type: 'dashed',
+          width: 1
+        }
+      },
+      axisLine: {
+        show: false
+      }
+    },
+    angleAxis: {
+      type: 'category',
+      data: stageData.value.map(item => item.code),
+      boundaryGap: false,
+      axisLabel: {
+        show: showLabels.value,
+        fontSize: 10,
+        color: '#333',
+        margin: 15
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: '#e0e0e0',
+          type: 'solid',
+          width: 1
         }
       },
       axisLine: {
@@ -485,26 +848,31 @@ const peaChartOption = computed(() => {
       {
         type: 'bar',
         coordinateSystem: 'polar',
-        data: stageData.value.map(item => item.pea),
-        itemStyle: {
-          color: function(params) {
-            return getStageColor(params.value)
-          },
-          borderColor: '#fff',
-          borderWidth: 1
-        },
+        data: stageData.value.map((item, index) => ({
+          value: item.pea,
+          itemStyle: {
+            color: getStageColor(item.pea),
+            borderColor: '#fff',
+            borderWidth: 2,
+            shadowBlur: 5,
+            shadowColor: 'rgba(0, 0, 0, 0.2)',
+            shadowOffsetY: 2
+          }
+        })),
+        barWidth: '60%',
         emphasis: {
           itemStyle: {
-            shadowBlur: 10,
-            shadowColor: 'rgba(0, 0, 0, 0.3)'
+            shadowBlur: 15,
+            shadowColor: 'rgba(0, 0, 0, 0.4)'
           }
         },
         label: {
           show: showLabels.value,
-          position: 'middle',
+          position: 'outside',
           formatter: '{c}%',
           fontSize: 10,
-          color: '#333'
+          color: '#333',
+          fontWeight: 'bold'
         }
       }
     ]
