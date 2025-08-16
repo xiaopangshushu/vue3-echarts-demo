@@ -35,6 +35,10 @@ git push origin main
 1. **查看部署状态**
    - 点击仓库顶部的 **"Actions"** 标签
    - 你会看到一个正在运行的工作流 "Deploy to GitHub Pages"
+   - ⚠️ **如果没有看到Actions运行**：
+     - 确保GitHub Pages设置为 "GitHub Actions"
+     - 检查 `.github/workflows/deploy.yml` 文件是否存在
+     - 推送代码后等待几分钟
    - 等待状态变为绿色的 ✅
 
 2. **获取网站链接**
@@ -76,10 +80,23 @@ GitHub Actions enables you to build and deploy from any branch or commit.
 
 ## 🔍 故障排除
 
+### 如果没有看到Actions运行
+1. **检查GitHub Pages设置**：
+   - 进入 Settings > Pages
+   - 确保Source选择的是 "GitHub Actions" 而不是 "Deploy from a branch"
+   
+2. **检查工作流文件**：
+   - 确保 `.github/workflows/deploy.yml` 文件存在
+   - 文件内容应该包含正确的权限设置
+
+3. **手动触发部署**：
+   - 在Actions页面，点击工作流名称
+   - 点击 "Run workflow" 按钮
+
 ### 如果部署失败
 1. 检查 Actions 页面的错误信息
 2. 确保 package.json 中的 build 脚本正常
-3. 检查 .github/workflows/deploy.yml 文件是否存在
+3. 检查 vite.config.js 中的 base 路径设置
 
 ### 如果网站无法访问
 1. 等待5-10分钟，GitHub Pages需要时间生效
