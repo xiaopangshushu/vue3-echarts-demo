@@ -45,6 +45,12 @@
           <router-link to="/growth-stage-radar" class="btn primary">查看演示</router-link>
         </div>
 
+        <div class="demo-card">
+          <h3>径向生长阶段图分析仪表板</h3>
+          <p>专业径向图表分析工具，支持多tab管理、数据编辑、导出功能和SnapDOM下载</p>
+          <router-link to="/radial-stage-analysis" class="btn primary featured">查看演示</router-link>
+        </div>
+
       </div>
     </div>
     

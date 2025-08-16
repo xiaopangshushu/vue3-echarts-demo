@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RadarChart from '@/views/RadarChart.vue'
 import NitrogenUtilizationRadar from '@/views/NitrogenUtilizationRadar.vue'
@@ -6,9 +6,10 @@ import NitrogenTimeSeriesRadar from '@/views/NitrogenTimeSeriesRadar.vue'
 import NitrogenInteractiveRadar from '@/views/NitrogenInteractiveRadar.vue'
 import IntegratedRadarDashboard from '@/views/IntegratedRadarDashboard.vue'
 import GrowthStageRadar from '@/views/GrowthStageRadar.vue'
+import RadialStageAnalysis from '@/views/RadialStageAnalysis.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
@@ -52,7 +53,12 @@ const router = createRouter({
       path: '/growth-stage-radar',
       name: 'growth-stage-radar',
       component: GrowthStageRadar
-    }
+    },
+    {
+      path: '/radial-stage-analysis',
+      name: 'radial-stage-analysis',
+      component: RadialStageAnalysis
+    },  
   ],
 })
 

@@ -22,5 +22,5 @@ export default defineConfig({
       }
     }
   },
-  base: '/vue3-echarts-demo/' // ← 改成自己的仓库名
+  base: '/vue3-echarts-demo/', // ← 改成自己的仓库名
 })

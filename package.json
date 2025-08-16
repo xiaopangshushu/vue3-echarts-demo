@@ -13,8 +13,10 @@
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
+    "@zumer/snapdom": "^1.9.9",
     "echarts": "^5.6.0",
     "element-plus": "^2.10.7",
+    "html2canvas": "^1.4.1",
     "sass": "^1.90.0",
     "vue": "^3.5.18",
     "vue-echarts": "^7.0.3",
